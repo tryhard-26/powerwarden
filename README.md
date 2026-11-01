@@ -26,10 +26,11 @@ cd powerwarden-v0.1.0-macos-universal
 ```
 
 To build from source, clone the repository and run `make`, which writes the
-binary to `build/powerwarden`. Running `make check` afterwards starts a busy
-loop, caps it at 25% with a `stop` rule and verifies that the process is
-resumed when powerwarden exits normally and after it has been killed and
-restarted.
+binary to `build/powerwarden`. Running `make check` afterwards builds a small
+busy loop and uses it to test rule parsing, the `stop` cap on one process and
+on a group of two, `bg` being applied and released, dry-run mode, and that
+throttled processes are resumed both when powerwarden exits normally and
+after it has been killed and restarted.
 
 ```sh
 git clone https://github.com/tryhard-26/powerwarden
@@ -74,7 +75,10 @@ sudo launchctl bootstrap system /Library/LaunchDaemons/org.tryhard.powerwarden.p
 
 The daemon logs to `/var/log/powerwarden.log` and can be removed again with
 `sudo make uninstall`. When powerwarden runs as a normal user instead of
-root, it can only throttle processes owned by that same user.
+root, it can only throttle processes owned by that same user. When it runs as
+root, it refuses a config file that is not owned by root or that group or
+other users can write to, because anyone able to edit the rules could
+otherwise use the daemon to pause arbitrary processes.
 
 ## Configuration
 
@@ -82,6 +86,8 @@ The config file holds one rule per line in the form
 `<match> <cpu%> <watts> <action>`, and anything after a `#` is ignored. The
 match string is compared against the full executable path of every process,
 and it needs quotes if it contains spaces, as in `"Microsoft Teams.app"`.
+A process that matches several rules is only counted under the first one in
+the file.
 The CPU budget is summed over the whole group and uses the same scale as
 Activity Monitor, where 100 means one fully busy core, while the power budget
 is in watts and is derived from the kernel's per-process energy counter.
