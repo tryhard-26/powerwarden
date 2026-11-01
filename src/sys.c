@@ -7,14 +7,19 @@
 
 static mach_timebase_info_data_t tb;
 
-#ifndef __arm64__
+/* not raw CNTVCT: 1GHz + per-core skew on M4, mach_abs is scaled */
 uint64_t pw_tick(void) { return mach_absolute_time(); }
-#endif
 
 uint64_t pw_ns(uint64_t tk)
 {
 	if (!tb.denom) mach_timebase_info(&tb);
 	return (uint64_t)((unsigned __int128)tk * tb.numer / tb.denom);
+}
+
+uint64_t pw_tk(uint64_t ns)
+{
+	if (!tb.denom) mach_timebase_info(&tb);
+	return (uint64_t)((unsigned __int128)ns * tb.denom / tb.numer);
 }
 
 /* ri_*time is in mach abs units on arm64, not ns */
