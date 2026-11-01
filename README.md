@@ -19,9 +19,9 @@ source also requires the Xcode Command Line Tools, which you can install with
 Prebuilt universal binaries are attached to each GitHub release:
 
 ```sh
-curl -LO https://github.com/tryhard-26/powerwarden/releases/download/v0.1.0/powerwarden-v0.1.0-macos-universal.tar.gz
-tar xzf powerwarden-v0.1.0-macos-universal.tar.gz
-cd powerwarden-v0.1.0-macos-universal
+curl -LO https://github.com/tryhard-26/powerwarden/releases/download/v0.1.1/powerwarden-v0.1.1-macos-universal.tar.gz
+tar xzf powerwarden-v0.1.1-macos-universal.tar.gz
+cd powerwarden-v0.1.1-macos-universal
 ./powerwarden -V
 ```
 
