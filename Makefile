@@ -26,7 +26,7 @@ check: $(B)/powerwarden
 	sh test/check.sh $(B)/powerwarden
 
 install: $(B)/powerwarden
-	install -d $(DESTDIR)$(PREFIX)/bin $(DESTDIR)$(PREFIX)/etc
+	install -d $(DESTDIR)$(PREFIX)/bin $(DESTDIR)$(PREFIX)/etc $(DESTDIR)/Library/LaunchDaemons
 	install -m 755 $(B)/powerwarden $(DESTDIR)$(PREFIX)/bin/
 	[ -f $(DESTDIR)$(PREFIX)/etc/powerwarden.conf ] || install -m 644 etc/powerwarden.conf $(DESTDIR)$(PREFIX)/etc/
 	install -m 644 etc/org.tryhard.powerwarden.plist $(DESTDIR)/Library/LaunchDaemons/

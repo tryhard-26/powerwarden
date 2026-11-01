@@ -5,7 +5,7 @@
 extern "C" {
 #endif
 
-typedef struct { uint64_t t, pt, nj; } pw_ru; /* cpu ns, pcore ns, nrg nJ */
+typedef struct { uint64_t t, pt, nj, st; } pw_ru; /* cpu ns, pcore ns, nrg nJ, start abs (pid id) */
 
 uint64_t pw_tick(void);
 uint64_t pw_ns(uint64_t tk);

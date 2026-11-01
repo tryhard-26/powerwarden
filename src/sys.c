@@ -3,6 +3,7 @@
 #include <libproc.h>
 #include <mach/mach_time.h>
 #include <signal.h>
+#include <string.h>
 #include <sys/resource.h>
 
 static mach_timebase_info_data_t tb;
@@ -22,14 +23,19 @@ uint64_t pw_tk(uint64_t ns)
 	return (uint64_t)((unsigned __int128)ns * tb.denom / tb.numer);
 }
 
-/* ri_*time is in mach abs units on arm64, not ns */
+/* ri_*time is in mach abs units on arm64, not ns; v6 is a superset of v4, fall back on old krnl */
 int pw_ru_get(pid_t p, pw_ru *o)
 {
 	struct rusage_info_v6 r;
-	if (proc_pid_rusage(p, RUSAGE_INFO_V6, (rusage_info_t *)&r)) return -1;
+	if (proc_pid_rusage(p, RUSAGE_INFO_V6, (rusage_info_t *)&r)) {
+		if (errno != EINVAL) return -1;
+		memset(&r, 0, sizeof r);
+		if (proc_pid_rusage(p, RUSAGE_INFO_V4, (rusage_info_t *)&r)) return -1;
+	}
 	o->t = pw_ns(r.ri_user_time + r.ri_system_time);
 	o->pt = pw_ns(r.ri_user_ptime + r.ri_system_ptime);
 	o->nj = r.ri_energy_nj ? r.ri_energy_nj : r.ri_billed_energy;
+	o->st = r.ri_proc_start_abstime;
 	return 0;
 }
 
@@ -42,7 +48,7 @@ int pw_pids(pid_t *b, int n)
 int pw_path(pid_t p, char *b, int n) { return proc_pidpath(p, b, (uint32_t)n) > 0; }
 
 /* == taskpolicy -b: DARWIN_BG -> bg QoS, E-cores only on AS */
-int pw_bg(pid_t p, int on) { return setpriority(PRIO_DARWIN_PROCESS, p, on ? PRIO_DARWIN_BG : 0); }
+int pw_bg(pid_t p, int on) { return setpriority(PRIO_DARWIN_PROCESS, (id_t)p, on ? PRIO_DARWIN_BG : 0); }
 
 int pw_getnice(pid_t p)
 {
